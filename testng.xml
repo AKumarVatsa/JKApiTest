@@ -1,0 +1,9 @@
+<suite name="FastAPI Test Suite">
+    <test name="API Tests">
+        <classes>
+            <class name="tests.AccountsTest"/>
+            <class name="tests.BooksTest"/>
+            <class name="tests.NegativeTest"/>
+        </classes>
+    </test>
+</suite>
