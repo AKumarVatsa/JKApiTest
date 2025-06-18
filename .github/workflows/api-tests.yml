@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: extent-report
-          path: test-output/ExtentReports.html
+          path: test-output/ExtentReport.html
 
       - name: Upload Code Coverage Report
         if: always()
