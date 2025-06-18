@@ -63,6 +63,17 @@
       </executions>
     </plugin>
     
+    <!--for java 17-->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.10.1</version> <!-- or newer -->
+      <configuration>
+        <source>17</source>
+        <target>17</target>
+      </configuration>
+    </plugin>
+    
         </plugins>
     </build>
 
