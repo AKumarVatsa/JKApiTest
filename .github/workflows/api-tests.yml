@@ -1,4 +1,4 @@
-name: API Test Suite
+name: API Test
 
 on:
   push:
