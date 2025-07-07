@@ -80,7 +80,7 @@ View the report in your browser. Reports are present in the path:
 test-output/ExtentReports.html
 
 ## How to View GitHub Actions Reports
-Go to repo URL (https://github.com/karanAtreya1986/BookStoreAPITesting.git) → Actions
+Go to repo URL (https://github.com/AKumarVatsa/BookStoreAPITesting.git) → Actions
 Click on the latest workflow run.
 Scroll to Artifacts.
 
@@ -100,10 +100,3 @@ Create your feature branch (git checkout -b feature/add-new-test)
 Commit and push
 
 Submit a pull request
-
-
-
-
-## Authors
-
-- [@karanAtreya1986](https://www.github.com/karanAtreya1986)
