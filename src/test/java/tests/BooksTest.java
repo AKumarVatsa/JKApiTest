@@ -156,8 +156,6 @@ public class BooksTest extends BaseTest {
 	    Assert.assertNotNull(AccountsTest.token, "Token is null!");
 	    Assert.assertNotNull(AccountsTest.id, "User ID is null!");
 	    Assert.assertNotNull(BooksTest.isbnNumber, "ISBN is null!");
-
-	    // Send GET request to fetch user collection
 	    response = given()
 	        .header("Authorization", "Bearer " + AccountsTest.token)
 	        .when()
@@ -170,8 +168,6 @@ public class BooksTest extends BaseTest {
 	    String responseBody = response.getBody().asString();
 	    System.out.println("User collection after deletion: " + responseBody);
 	    test.log(Status.INFO, "User collection after delete: " + responseBody);
-
-	    // Verify the ISBN is no longer in the user's collection
 	    Assert.assertFalse(responseBody.contains(BooksTest.isbnNumber),
 	        "Deleted book still appears in the user's collection.");
 
