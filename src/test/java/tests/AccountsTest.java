@@ -15,92 +15,35 @@ import io.restassured.response.Response;
 
 public class AccountsTest extends BaseTest {
 
-	public static String username = "user" + (int) (Math.random() * 10000);
-	public static String token;
-	public Response response;
-	public static String id;
+    private static final String PASSWORD = ConfigManager.get("password");
+    private static final String AUTH_HEADER = "Authorization";
 
-	@Test(priority = 1)
-	public void testCreateUser() {
+    private static final String username = "user" + (int) (Math.random() * 10_000);
+    private static String token;
+    private static String userId;
 
-		test = report.createTest("Create User Test");
+    private Response sendPostRequest(String endpoint, String body) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post(endpoint)
+                .then()
+                .extract()
+                .response();
+    }
 
-		String requestBody = String.format("""
-				    {
-				      "userName": "%s",
-				      "password": "%s"
-				    }
-				""", username, ConfigManager.get("password"));
+    private String buildAuthBody() {
+        return String.format("""
+                {
+                  "userName": "%s",
+                  "password": "%s"
+                }
+                """, username, PASSWORD);
+    }
 
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .body(requestBody)
-				 .when()
-				 .post(CREATE_USER)
-				 .then()
-				.statusCode(201)
-				.extract().response();
+    @Test(priority = 1)
+    public void testCreateUser() {
+        test = report.createTest("Create User Test");
 
-		System.out.println("Response Body for create user: " + response.getBody().asString()); // helpful debug
-
-		// print in reports.
-		test.log(Status.INFO, "Response body for new user is " + response.getBody().asString());
-
-		 id = response.jsonPath().getString("userID");
-		Assert.assertNotNull(id);
-		test.log(Status.PASS, "User created with ID: " + id);
-	}
-
-	@Test(priority = 2, dependsOnMethods = "testCreateUser")
-	public void testGenerateToken() {
-		
-		test = report.createTest("Generate Token Test");
-
-		String requestBody = String.format("""
-				    {
-				      "userName": "%s",
-				      "password": "%s"
-				    }
-				""", username, ConfigManager.get("password"));
-
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .body(requestBody)
-				 .when()
-				 .post(GENERATE_TOKEN)
-				.then()
-				.statusCode(200)
-				.extract().response();
-
-		System.out.println("Response Body for generate token: " + response.getBody().asString()); // helpful debug
-
-		// print in reports.
-		test.log(Status.INFO, "Response body for generate token is " + response.getBody().asString());
-
-		token = response.jsonPath().getString("token");
-		Assert.assertNotNull(token);
-		test.log(Status.PASS, "User token created: " + token);
-	}
-	
-	@Test(priority = 3, dependsOnMethods = "testCreateUser")
-	public void testUserIsCreated() {
-
-		test = report.createTest("Check user is created");
-
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .header("Authorization", "Bearer " + token)
-				 .pathParam("userId", id)
-				 .when()
-				 .get(GET_USER + "{userId}")
-				 .then()
-				.statusCode(200)
-				.extract().response();
-
-		System.out.println("Response Body to check if user present: " + response.getBody().asString()); // helpful debug
-
-		// print in reports.
-		test.log(Status.INFO, "Response body to check if user is present " + response.getBody().asString());
-
-	}
-}
+        Response respon
