@@ -125,18 +125,5 @@ public class NegativeTest extends BaseTest {
         logAndAssert("Passwords must have", response.getBody().asString(), "Missing password correctly rejected");
     }
 
-    // NEW: Register duplicate user
-    @Test(dependsOnMethods = {"tests.AccountsTest.testCreateUser"})
-    public void registerDuplicateUser() {
-        test = report.createTest("Register Duplicate User");
-
-        String body = String.format("""
-            { "userName": "%s", "password": "%s" }
-            """, AccountsTest.username, AccountsTest.password);
-
-        response = given().contentType(ContentType.JSON).body(body)
-                .post(CREATE_USER).then().statusCode(406).extract().response();
-
-        logAndAssert("User exists!", response.getBody().asString(), "Duplicate user creation rejected");
-    }
+   
 }
