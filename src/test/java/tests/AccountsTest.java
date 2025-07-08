@@ -1,93 +1,102 @@
 package tests;
+
 import static constants.EndPoints.*;
 import static io.restassured.RestAssured.given;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import com.aventstack.extentreports.Status;
+
 import base.BaseTest;
 import config.ConfigManager;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 public class AccountsTest extends BaseTest {
-	public static String username = "user" + (int) (Math.random() * 10000);
-	public static String token;
-	public Response response;
-	public static String id;
 
-	@Test(priority = 1)
-	public void testCreateUser() {
+    public static String username = "user" + (int) (Math.random() * 10000);
+    public static String token;
+    public static String id;
 
-		test = report.createTest("Create User Test");
+    public Response response;
 
-		String requestBody = String.format("""
-				    {
-				      "userName": "%s",
-				      "password": "%s"
-				    }
-				""", username, ConfigManager.get("password"));
+    // ─────────────────────────────────────────────
+    // 🔧 Utility Methods
+    // ─────────────────────────────────────────────
 
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .body(requestBody)
-				 .when()
-				 .post(CREATE_USER)
-				 .then()
-				.statusCode(201)
-				.extract().response();
+    private String createRequestBody(String username, String password) {
+        return String.format("""
+                {
+                  "userName": "%s",
+                  "password": "%s"
+                }
+                """, username, password);
+    }
 
-		System.out.println("Response Body for create user: " + response.getBody().asString()); // helpful debug
-		test.log(Status.INFO, "Response body for new user is " + response.getBody().asString());
+    private Response sendRequest(String method, String endpoint, String body) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .request(method, endpoint)
+                .then()
+                .extract()
+                .response();
+    }
 
-		 id = response.jsonPath().getString("userID");
-		Assert.assertNotNull(id);
-		test.log(Status.PASS, "User created with ID: " + id);
-	}
+    private void logAndAssertResponse(String title, String responseBody, boolean condition, String passMessage) {
+        test.log(Status.INFO, title + ": " + responseBody);
+        System.out.println(title + ": " + responseBody);
+        Assert.assertTrue(condition, "Assertion failed for: " + title);
+        test.log(Status.PASS, passMessage);
+    }
 
-	@Test(priority = 2, dependsOnMethods = "testCreateUser")
-	public void testGenerateToken() {
-		
-		test = report.createTest("Generate Token Test");
+    // ─────────────────────────────────────────────
+    // ✅ Test Methods
+    // ─────────────────────────────────────────────
 
-		String requestBody = String.format("""
-				    {
-				      "userName": "%s",
-				      "password": "%s"
-				    }
-				""", username, ConfigManager.get("password"));
+    @Test(priority = 1)
+    public void testCreateUser() {
+        test = report.createTest("Create User Test");
 
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .body(requestBody)
-				 .when()
-				 .post(GENERATE_TOKEN)
-				.then()
-				.statusCode(200)
-				.extract().response();
+        String requestBody = createRequestBody(username, ConfigManager.get("password"));
 
-		System.out.println("Response Body for generate token: " + response.getBody().asString()); // helpful debug
-		test.log(Status.INFO, "Response body for generate token is " + response.getBody().asString());
+        response = sendRequest("POST", CREATE_USER, requestBody);
+        Assert.assertEquals(response.statusCode(), 201, "Create User - Unexpected Status Code");
 
-		token = response.jsonPath().getString("token");
-		Assert.assertNotNull(token);
-		test.log(Status.PASS, "User token created: " + token);
-	}
-	
-	@Test(priority = 3, dependsOnMethods = "testCreateUser")
-	public void testUserIsCreated() {
-		test = report.createTest("Check user is created");
-		 response = given()
-				 .contentType(ContentType.JSON)
-				 .header("Authorization", "Bearer " + token)
-				 .pathParam("userId", id)
-				 .when()
-				 .get(GET_USER + "{userId}")
-				 .then()
-				.statusCode(200)
-				.extract().response();
+        id = response.jsonPath().getString("userID");
+        logAndAssertResponse("Create User Response", response.getBody().asString(), id != null, "User created with ID: " + id);
+    }
 
-		System.out.println("Response Body to check if user present: " + response.getBody().asString()); // helpful debug
-		test.log(Status.INFO, "Response body to check if user is present " + response.getBody().asString());
+    @Test(priority = 2, dependsOnMethods = "testCreateUser")
+    public void testGenerateToken() {
+        test = report.createTest("Generate Token Test");
 
-	}
+        String requestBody = createRequestBody(username, ConfigManager.get("password"));
+
+        response = sendRequest("POST", GENERATE_TOKEN, requestBody);
+        Assert.assertEquals(response.statusCode(), 200, "Generate Token - Unexpected Status Code");
+
+        token = response.jsonPath().getString("token");
+        logAndAssertResponse("Generate Token Response", response.getBody().asString(), token != null, "Token generated: " + token);
+    }
+
+    @Test(priority = 3, dependsOnMethods = "testCreateUser")
+    public void testUserIsCreated() {
+        test = report.createTest("Get Created User Details");
+
+        response = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .pathParam("userId", id)
+                .when()
+                .get(GET_USER + "{userId}")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        logAndAssertResponse("Get User Response", response.getBody().asString(), response.statusCode() == 200, "User details fetched successfully.");
+    }
 }
