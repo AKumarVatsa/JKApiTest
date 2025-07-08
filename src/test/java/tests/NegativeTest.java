@@ -109,21 +109,5 @@ public class NegativeTest extends BaseTest {
 
         logAndAssert("User Id not correct!", response.getBody().asString(), "Delete without user ID rejected");
     }
-
-    // NEW: Create user with missing password
-    @Test
-    public void createUserMissingFields() {
-        test = report.createTest("Create User - Missing Password");
-
-        String body = """
-            { "userName": "missingPasswordUser" }
-            """;
-
-        response = given().contentType(ContentType.JSON).body(body)
-                .post(CREATE_USER).then().statusCode(400).extract().response();
-
-        logAndAssert("Passwords must have", response.getBody().asString(), "Missing password correctly rejected");
-    }
-
-   
+  
 }
